@@ -1,7 +1,7 @@
 # Stock Price Prediction
 This is an experimental project to use Long Short Term Memory (LSTM) networks for the stock price prediction.
 
-
+![Prediction image](prediction.png)
 
 ## Create virtual env
 ```

@@ -33,15 +33,15 @@ def build_model(input_shape, learning_rate):
 		tf.keras.layers.Dropout(0.25),
 		tf.keras.layers.LSTM(256),
 		tf.keras.layers.Dropout(0.25),
-		tf.keras.layers.Dense(64, activation='relu'),
-		tf.keras.layers.Dense(1, name='fc')
+		tf.keras.layers.Dense(64, activation="relu"),
+		tf.keras.layers.Dense(1, name="fc")
 	])
 
 	optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
 
-	model.compile(loss='mse',
+	model.compile(loss="mse",
 		optimizer=optimizer,
-		metrics=['mae', 'mse'])
+		metrics=["mae", "mse"])
 	return model
   
 
@@ -58,7 +58,7 @@ def train(filepath, model_dir, num_epochs, learning_late):
 	file_writer.set_as_default()
 	tensorboard_callback = TensorBoard(
 		log_dir=log_dir,
-		update_freq='batch',
+		update_freq="batch",
 		histogram_freq=1)
 
 	# Training model
@@ -73,10 +73,10 @@ def train(filepath, model_dir, num_epochs, learning_late):
 
 def main():	
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--filepath', required=True, help="path to the data file")
-	parser.add_argument('--model_dir', default="models", help="path to folder containing models")
-	parser.add_argument('--num_epochs', type=int, default=100)
-	parser.add_argument('--learning_rate', type=float, default=0.0001)
+	parser.add_argument("--filepath", required=True, help="Path to the training data file")
+	parser.add_argument("--model_dir", default="models", help="Path to folder containing models")
+	parser.add_argument("--num_epochs", type=int, default=100, help="Number of epochs to train")
+	parser.add_argument("--learning_rate", type=float, default=0.0001, help="Learning rate")
 	args = parser.parse_args()	
 
 	train(args.filepath, args.model_dir, args.num_epochs, args.learning_rate)

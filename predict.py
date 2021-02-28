@@ -18,14 +18,16 @@ def predict(model_dir, symbol, past_days):
     tickerData = yf.Ticker(symbol)
 
     # Get the historical prices for this ticker
-    start = "2010-1-1"
+    start = "2019-1-1"
     end = datetime.today().strftime("%Y-%m-%d")
-    tickerDf = tickerData.history(period='1d', start=start, end=end)
+    tickerDf = tickerData.history(period="1d", start=start, end=end)
 
+    trueY = []
     predictedY = []
     pastMonthPrices = []
     for i in range(len(tickerDf)):
         value = tickerDf["Close"][i]
+        trueY.append(value)
 
         if len(pastMonthPrices) == past_days:
             data = copy.deepcopy(pastMonthPrices)
@@ -37,8 +39,11 @@ def predict(model_dir, symbol, past_days):
             x = numpy.array(normalized_data)
             X = numpy.zeros((1, 1, len(x)), dtype=float)
             X[0, 0, :] = x
-            y = model.predict(X).flatten()
-            predictedY.append(y[0])
+            predicted_y = model.predict(X).flatten()
+
+            # Denormalize the prediction
+            denormalized_predicted_y = predicted_y[0] * data[-1]
+            predictedY.append(denormalized_predicted_y)
 
             pastMonthPrices.pop(0)
         else:
@@ -47,8 +52,11 @@ def predict(model_dir, symbol, past_days):
         pastMonthPrices.append(value)
 	
     # Draw prediction
-    plt.plot(tickerDf["Close"])
-    plt.plot(predictedY)
+    plt.plot(trueY, "b")
+    plt.plot(predictedY, "r")
+    plt.ylabel("{} stock prices".format(symbol))
+    plt.title("Actual Stock vs Predictions comparison")
+    plt.legend(["Actual", "Prediction"])
     plt.show()
 
 
