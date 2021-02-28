@@ -28,7 +28,7 @@ python3 generate_training_data.py --symbol MSFT --out train_data.txt
 python3 train.py --filepath train_data.txt
 ```
 
-# How to predict?
+## How to predict?
 ```
 python3 predict.py --symbol MSFT
 ```
