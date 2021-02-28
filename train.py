@@ -34,9 +34,9 @@ def load_data(filepath):
 	return TX, TY
 
 
-def build_model(num_features, learning_rate):
+def build_model(input_shape, learning_rate):
 	model = tf.keras.Sequential([
-		tf.keras.layers.GRU(256, input_shape=(1, num_features), name="GRU"),
+		tf.keras.layers.GRU(256, input_shape=input_shape, return_sequences=True, name="GRU"),
 		tf.keras.layers.Dropout(0.25),
 		tf.keras.layers.LSTM(256),
 		tf.keras.layers.Dropout(0.25),
@@ -58,7 +58,7 @@ def train(filepath, model_dir, num_epochs, learning_late):
 	print(X.shape)
 
 	# Build model
-	model = build_model(len(X[0]), learning_late)
+	model = build_model(X[0].shape, learning_late)
 
 	# Setup for Tensorboard
 	log_dir="logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
