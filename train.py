@@ -14,7 +14,7 @@ def load_data(filepath):
 	Y = []
 	file = open(filepath, "r")
 	for line in file.readlines():
-		data = line.split(",")
+		data = [float(x) for x in line.split(",")]
 		X.append(data[:-1])
 		Y.append(data[-1])
 
@@ -73,7 +73,7 @@ def train(filepath, model_dir, num_epochs, learning_late):
 
 def main():	
 	parser = argparse.ArgumentParser()
-	parser.add_argument("--filepath", required=True, help="Path to the training data file")
+	parser.add_argument("--filepath", default="train_data.txt", help="Path to the training data file")
 	parser.add_argument("--model-dir", default="models", help="Path to folder containing models")
 	parser.add_argument("--num-epochs", type=int, default=70, help="Number of epochs to train")
 	parser.add_argument("--learning-rate", type=float, default=0.0001, help="Learning rate")

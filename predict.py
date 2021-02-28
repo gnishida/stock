@@ -18,37 +18,42 @@ def predict(model_dir, symbol, past_days):
     tickerData = yf.Ticker(symbol)
 
     # Get the historical prices for this ticker
-    start = "2019-1-1"
+    start = "2020-12-1"
     end = datetime.today().strftime("%Y-%m-%d")
     tickerDf = tickerData.history(period="1d", start=start, end=end)
 
     trueY = []
     predictedY = []
-    pastMonthPrices = []
+    pastPrices = []
     for i in range(len(tickerDf)):
         value = tickerDf["Close"][i]
 
-        if len(pastMonthPrices) == past_days:
-            data = copy.deepcopy(pastMonthPrices)
+        if len(pastPrices) == past_days + 1:
+            data = []
+            for i in range(len(pastPrices) - 1):
+                roc = (pastPrices[i + 1] - pastPrices[i]) / pastPrices[i]
+                data.append(roc)
 
             # Normalize training data
-            denom = data[-1]
-            normalized_data = [value / denom for value in data]
+            max_roc = max(data)
+            min_roc = min(data)
+            normalized_data = [(value - min_roc) / (max_roc - min_roc) for value in data]
 
             x = numpy.array(normalized_data)
             X = numpy.zeros((1, 1, len(x)), dtype=float)
             X[0, 0, :] = x
             predicted_y = model.predict(X).flatten()
+            print(predicted_y)
 
             # Denormalize the prediction
-            denormalized_predicted_y = predicted_y[0] * data[-1]
+            denormalized_predicted_y = (predicted_y[0] * (max_roc - min_roc) + min_roc) * pastPrices[-1] + pastPrices[-1]
             predictedY.append(denormalized_predicted_y)
 
             trueY.append(value)
 
-            pastMonthPrices.pop(0)
+            pastPrices.pop(0)
 		
-        pastMonthPrices.append(value)
+        pastPrices.append(value)
 	
     # Draw prediction
     plt.plot(trueY, "b")

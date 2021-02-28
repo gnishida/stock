@@ -23,25 +23,29 @@ def main():
 
     # Generate training data
     file = open(args.out, "w")
-    pastMonthPrices = []
+    pastPrices = []
     for i in range(len(tickerDf)):
         value = tickerDf["Close"][i]
-        if len(pastMonthPrices) == args.past_days:
-            data = copy.deepcopy(pastMonthPrices)
+        if len(pastPrices) == args.past_days + 1:
+            data = []
+            for i in range(len(pastPrices) - 1):
+                roc = (pastPrices[i + 1] - pastPrices[i]) / pastPrices[i]
+                data.append(roc)
 
             # Normalize training data
-            denom = data[-1]
-            data.append(value)
-            normalized_data = [value / denom for value in data]
+            max_roc = max(data)
+            min_roc = min(data)
+            data.append((value - pastPrices[-1]) / pastPrices[-1])
+            normalized_data = [(value - min_roc) / (max_roc - min_roc) for value in data]
 
             # Write data to the output file
             normalized_data_str = [str(v) for v in normalized_data]
             normalized_data_str = ",".join(normalized_data_str)
             file.write("{}\n".format(normalized_data_str))
 
-            pastMonthPrices.pop(0)
+            pastPrices.pop(0)
 
-        pastMonthPrices.append(value)
+        pastPrices.append(value)
         
     file.close()
 
