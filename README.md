@@ -25,7 +25,7 @@ python3 generate_training_data.py --symbol MSFT --out train_data.txt
 
 ## How to train?
 ```
-python3 train.py --filepath train_data.txt
+python3 train.py --filepath train_data.txt --num-epochs 70
 ```
 
 ## How to predict?

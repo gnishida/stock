@@ -27,7 +27,6 @@ def predict(model_dir, symbol, past_days):
     pastMonthPrices = []
     for i in range(len(tickerDf)):
         value = tickerDf["Close"][i]
-        trueY.append(value)
 
         if len(pastMonthPrices) == past_days:
             data = copy.deepcopy(pastMonthPrices)
@@ -45,9 +44,9 @@ def predict(model_dir, symbol, past_days):
             denormalized_predicted_y = predicted_y[0] * data[-1]
             predictedY.append(denormalized_predicted_y)
 
+            trueY.append(value)
+
             pastMonthPrices.pop(0)
-        else:
-            predictedY.append(value)
 		
         pastMonthPrices.append(value)
 	

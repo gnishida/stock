@@ -30,18 +30,18 @@ def load_data(filepath):
 def build_model(input_shape, learning_rate):
 	model = tf.keras.Sequential([
 		tf.keras.layers.GRU(256, input_shape=input_shape, return_sequences=True, name="GRU"),
-		tf.keras.layers.Dropout(0.25),
+		tf.keras.layers.Dropout(0.5),
 		tf.keras.layers.LSTM(256),
-		tf.keras.layers.Dropout(0.25),
+		tf.keras.layers.Dropout(0.5),
 		tf.keras.layers.Dense(64, activation="relu"),
 		tf.keras.layers.Dense(1, name="fc")
 	])
 
 	optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
 
-	model.compile(loss="mse",
+	model.compile(loss="mean_squared_error",
 		optimizer=optimizer,
-		metrics=["mae", "mse"])
+		metrics=["mean_squared_error"])
 	return model
   
 
@@ -74,9 +74,9 @@ def train(filepath, model_dir, num_epochs, learning_late):
 def main():	
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--filepath", required=True, help="Path to the training data file")
-	parser.add_argument("--model_dir", default="models", help="Path to folder containing models")
-	parser.add_argument("--num_epochs", type=int, default=100, help="Number of epochs to train")
-	parser.add_argument("--learning_rate", type=float, default=0.0001, help="Learning rate")
+	parser.add_argument("--model-dir", default="models", help="Path to folder containing models")
+	parser.add_argument("--num-epochs", type=int, default=70, help="Number of epochs to train")
+	parser.add_argument("--learning-rate", type=float, default=0.0001, help="Learning rate")
 	args = parser.parse_args()	
 
 	train(args.filepath, args.model_dir, args.num_epochs, args.learning_rate)
