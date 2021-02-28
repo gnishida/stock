@@ -25,22 +25,23 @@ def load_data(filepath):
 		X.append(data[:-1])
 		Y.append(data[-1])
 
-	TX = numpy.zeros((len(X), len(X[0]), 1, 1), dtype=float)
+	TX = numpy.zeros((len(X), 1, len(X[0])), dtype=float)
 	TY = numpy.zeros((len(X)), dtype=float)
 
 	for i in range(len(X)):
-		TX[i,:,0,0] = X[i]
+		TX[i, 0, :] = X[i]
 		TY[i] = Y[i]
 	return TX, TY
 
 
-def build_model(int_shape, learning_rate):
+def build_model(num_features, learning_rate):
 	model = tf.keras.Sequential([
-		tf.keras.layers.Dense(64, activation='relu', input_shape=int_shape, name='fc1'),
-		tf.keras.layers.Dropout(0.5),
-		tf.keras.layers.Dense(64, activation='relu', name='fc2'),
-		tf.keras.layers.GlobalAveragePooling2D(name='avg_pool'),
-		tf.keras.layers.Dense(1, name='fc3')
+		tf.keras.layers.GRU(256, input_shape=(1, num_features), name="GRU"),
+		tf.keras.layers.Dropout(0.25),
+		tf.keras.layers.LSTM(256),
+		tf.keras.layers.Dropout(0.25),
+		tf.keras.layers.Dense(64, activation='relu'),
+		tf.keras.layers.Dense(1, name='fc')
 	])
 
 	optimizer = tf.keras.optimizers.Adam(learning_rate=learning_rate)
@@ -54,9 +55,10 @@ def build_model(int_shape, learning_rate):
 def train(filepath, model_dir, num_epochs, learning_late):
 	# Load data
 	X, Y = load_data(filepath)
+	print(X.shape)
 
 	# Build model
-	model = build_model((len(X[0]), 1, 1), learning_late)
+	model = build_model(len(X[0]), learning_late)
 
 	# Setup for Tensorboard
 	log_dir="logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
