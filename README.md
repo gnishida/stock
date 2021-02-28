@@ -1,5 +1,5 @@
 # Stock Price Prediction
-This is an experimental project to use Long Short Term Memory (LSTM) networks for the stock price prediction.
+This is an experimental project to use Long Short Term Memory (LSTM) networks for the stock price prediction. I borrowed a lot of idea from this article: https://medium.com/analytics-vidhya/long-short-term-memory-networks-lstm-in-tensorflow-e986dac5cf27.
 
 ![Prediction image](prediction.png)
 
