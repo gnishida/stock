@@ -2,17 +2,15 @@ import argparse
 import copy
 from datetime import datetime
 import pandas
+import sklearn
 import yfinance as yf
-
-
-PAST_RANGE = 28
-FUTURE_RANGE = 5
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--symbol", default="MSFT", type=str, help="ticker symbol")
-    parser.add_argument("--out", default="train_data.txt", type=str, help="output file")
+    parser.add_argument("--past-days", default="5", type=int, help="How many past days are used for prediction?")
+    parser.add_argument("--symbol", default="MSFT", type=str, help="Ticker symbol")
+    parser.add_argument("--out", default="train_data.txt", type=str, help="Output file name")
     args = parser.parse_args()
 
     # Get data on the specified ticker
@@ -27,20 +25,23 @@ def main():
     file = open(args.out, "w")
     pastMonthPrices = []
     for i in range(len(tickerDf)):
-        pastMonthPrices.append(tickerDf["Close"][i])
-        
-        if len(pastMonthPrices) == PAST_RANGE:
-            if i + FUTURE_RANGE < len(tickerDf):
-                # Normalize training data
-                data = []
-                for price in pastMonthPrices:
-                    data.append("{:.4f}".format(price / tickerDf["Close"][i]))
+        value = tickerDf["Close"][i]
+        if len(pastMonthPrices) == args.past_days:
+            data = copy.deepcopy(pastMonthPrices)
 
-                data = ",".join(data)
-                ans = "{:.4f}".format(tickerDf["Close"][i + FUTURE_RANGE] / tickerDf["Close"][i])
-                file.write("{},{}\n".format(data, ans))
+            # Normalize training data
+            denom = data[-1]
+            data.append(value)
+            normalized_data = [value / denom for value in data]
+
+            # Write data to the output file
+            normalized_data_str = [str(v) for v in normalized_data]
+            normalized_data_str = ",".join(normalized_data_str)
+            file.write("{}\n".format(normalized_data_str))
 
             pastMonthPrices.pop(0)
+
+        pastMonthPrices.append(value)
         
     file.close()
 
