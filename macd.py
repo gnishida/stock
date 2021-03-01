@@ -1,3 +1,7 @@
+"""
+Experiment for MACD strategy
+"""
+
 import argparse
 from datetime import datetime
 import matplotlib.pyplot as plt
@@ -13,7 +17,7 @@ def is_going_up(data, index):
         return False
     
     for i in range(CONSISTENCY_DURATION):
-        if data[index - CONSISTENCY_DURATION + i] >= data[index - CONSISTENCY_DURATION + i + 1]:
+        if data[index - CONSISTENCY_DURATION + i] >= data[index]:
             return False
         
     return True
@@ -24,7 +28,7 @@ def is_going_down(data, index):
         return False
     
     for i in range(CONSISTENCY_DURATION):
-        if data[index - CONSISTENCY_DURATION + i] <= data[index - CONSISTENCY_DURATION + i + 1]:
+        if data[index - CONSISTENCY_DURATION + i] <= data[index]:
             return False
     
     return True
@@ -70,14 +74,16 @@ def run_simulation(data, macd, macd_signal):
     win_cnt = 0
     total_cnt = 0
     cost = 0
+    buy_dates = {}
+    sell_dates = {}
     for i in range(len(data)):
         if is_golden_cross(macd, macd_signal, i):
-            print("{} Buy for ${}".format(i, data[i]))
+            buy_dates[data.keys()[i]] = data[i]
             stock += 1
             cash -= data[i]
             cost += data[i]
         if is_death_cross(macd, macd_signal, i) and stock > 0:
-            print("{} Sell for ${}".format(i, data[i]))
+            sell_dates[data.keys()[i]] = data[i]
             if data[i] > cost / stock:
                 win_cnt += 1
             total_cnt += 1
@@ -85,7 +91,7 @@ def run_simulation(data, macd, macd_signal):
             stock = 0
             cost = 0
     
-    return cash, float(win_cnt) / total_cnt, stock
+    return cash, float(win_cnt) / total_cnt, stock, buy_dates, sell_dates
 
 
 def main():
@@ -109,18 +115,20 @@ def main():
     macd_signal = macd.ewm(span=9, adjust=False).mean()
 
     # Simulate buy/sell
-    profit, win_ratio, stock = run_simulation(data, macd, macd_signal)
+    profit, win_ratio, stock, buy_dates, sell_dates = run_simulation(data, macd, macd_signal)
     print("Profit: ${}".format(profit))
     print("Win ratio: {}%".format(win_ratio * 100))
     print("Remained #stock: {}".format(stock))
 
-    fig, ax1 = plt.subplots()
-    ax1.set_ylabel("Price ($)")
-    ax1.plot(data, label="{} prices".format(args.symbol), color="k")
-    ax2 = ax1.twinx()
-    ax2.plot(macd, label="MACD", color="b")
-    ax2.plot(macd_signal, label="Signal Line", color="r")
-    plt.legend()
+    fig, axs = plt.subplots(2)
+    axs[0].plot(data, label="{} prices".format(args.symbol), color="k")
+    axs[0].plot(buy_dates.keys(), buy_dates.values(), "b^")
+    axs[0].plot(sell_dates.keys(), sell_dates.values(), "rv")
+    axs[0].set_ylabel("Price ($)")
+    axs[0].legend()
+    axs[1].plot(macd, label="MACD", color="b")
+    axs[1].plot(macd_signal, label="Signal Line", color="r")
+    axs[1].legend()
     plt.show()
 
 
